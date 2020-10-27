@@ -5,46 +5,87 @@
 		</header>
 		<main class="users__main">
 			<div class="users__search">
-				<input type="text" placeholder="Поиск по пользователям...">
+				<input v-model="searchValue" type="text" placeholder="Поиск по пользователям...">
+                <div class="users__sort">
+                    Показывать
+                    <el-select 
+                        v-model="pageSize" 
+                        :value="pageSize"
+                        @change="pageSizeChangeHandler">
+                        <el-option
+                            v-for="(item, idx) in options"
+                            :key="item + idx"
+                            :label="item"
+                            :value="item">
+                        </el-option>
+                    </el-select>
+                    из {{this.users.length}}
+                </div>
 			</div>
 			<ul class="users__list">
-				<li class="users__item" v-for="user in users" :key="user.id">
+				<li class="users__item" v-for="user in displayedUsers" :key="user.id">
 					<router-link class="users__link" :to="'user/' + user.id">
 						<div class="users__image">
-							<img v-if="user.image" :src="user.image" :alt="user.name">
+							<img v-if="user.avatar" :src="user.avatar" :alt="user.first_name">
 						</div>
 						<div class="users__name">
-							<span class="name">{{user.name}}</span>
-							<span class="role">{{user.role}}</span>
+							<span class="name">{{user.first_name}} {{user.last_name}}</span>
+							<span class="email">{{user.email}}</span>
 						</div>
 					</router-link>
 				</li>
 			</ul>
+            <el-pagination
+                ref="pagination"
+				layout="prev, pager, next"
+                hide-on-single-page
+				:current-page="+this.$route.query.page || 1"
+				:page-size="pageSize"
+				@current-change="pageChangeHandler"
+				:total="filteredWorks.length">
+            </el-pagination>
 		</main>
 	</div>
 </template>
 
 <script>
-import axios from 'axios'
 export default {
-	name: "UserList",
+    name: "UserList",
     data() {
         return {
-            users: null
-		};
+            pageSize: 3,
+            options: [1,2,3,4,5],
+            searchValue: ''
+		}
 	},
 	computed: {
-		// users () {
-        //     return this.$store.getters.users
-		// }
+		users () {
+            return this.$store.getters.users
+        },
+        filteredWorks () {
+            return this.users.filter(user => {
+                const fullName = user.first_name + ' ' + user.last_name
+                if(this.searchValue === '') return true;
+                else return fullName.toLowerCase().indexOf(this.searchValue.toLowerCase()) > -1;
+            })
+        },
+        displayedUsers () {
+            let page = +this.$route.query.page || 1
+            let perPage = this.pageSize
+            let from = (page * perPage) - perPage
+            let to = (page * perPage)
+            return this.filteredWorks.slice(from, to)
+        }
 	},
-    methods: {},
-    mounted () {
-        axios.get('https://demo7931371.mockable.io/users').then(response => {
-            console.log(response)
-            this.users = response.data.data
-        })
-        
+    methods: {
+        pageChangeHandler(val) {
+            this.$router.push({path: '/', query: {page: val}})
+        },
+        pageSizeChangeHandler() {
+            if (this.$route.query.page && this.$route.query.page !== 1) {
+                this.$router.replace({'query': null})
+            }
+        }
     }
 };
 </script>
@@ -69,6 +110,9 @@ export default {
 }
 .users__main {
 	padding: 15px 25px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 90px);
 }
 .users__search {
 	display: flex;
@@ -84,9 +128,25 @@ export default {
 		}
 	}
 }
+.users__sort {
+    margin-left: 10px;
+    font-size: 14px;
+    .el-input {
+        width: 60px;
+        max-width: 60px;
+    }
+    .el-input__inner {
+        padding: 0 15px;
+    }
+    .el-input__suffix {
+        display: flex;
+        align-items: center;
+    }
+}
 .users__list {
 	margin-top: 20px;
 	padding: 0;
+    flex-grow: 1;
 }
 .users__item {
 	list-style: none;
@@ -123,7 +183,7 @@ export default {
 		display: inline-block;
 		margin-bottom: 2px;
 	}
-	.role {
+	.email {
 		font-size: 13px;
 		color: #aaa;
 	}
