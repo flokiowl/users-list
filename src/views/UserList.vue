@@ -28,7 +28,7 @@
           из {{ this.users.length }}
         </div>
       </div>
-      <ul class="users__list">
+      <ul class="users__list" v-if="displayedUsers.length">
         <li class="users__item" v-for="user in displayedUsers" :key="user.id">
           <router-link class="users__link" :to="'user/' + user.id">
             <div class="users__image">
@@ -47,6 +47,9 @@
           </router-link>
         </li>
       </ul>
+      <div v-else>
+        <p>Нету пользователей</p>
+      </div>
       <el-pagination
         ref="pagination"
         layout="prev, pager, next"

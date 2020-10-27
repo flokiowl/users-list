@@ -14,10 +14,16 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    loadUsers({ commit }) {
-      axios.get("https://reqres.in/api/users?page=2").then((response) => {
-        commit("loadUsers", response.data.data);
-      });
+    async loadUsers({ commit }) {
+      try {
+        await axios
+          .get("https://reqres.in/api/users?page=2")
+          .then((response) => {
+            commit("loadUsers", response.data.data);
+          });
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
   getters: {
