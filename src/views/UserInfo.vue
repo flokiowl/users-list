@@ -42,6 +42,16 @@ export default {
 </script>
 
 <style lang="scss">
+.users__header {
+	display: flex;
+	justify-content: space-between;
+	background: #eee;
+	padding: 15px 25px;
+	h1 {
+		font-size: 28px;
+		margin: 0;
+	}
+}
 .user__back {
 	display: inline-block;
 	padding: 15px 25px;
