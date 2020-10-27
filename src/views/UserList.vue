@@ -40,7 +40,11 @@ export default {
 	},
     methods: {},
     mounted () {
-        axios.get('http://demo7931371.mockable.io/users').then(response => this.users = response)
+        axios.get('https://demo7931371.mockable.io/users').then(response => {
+            console.log(response)
+            this.users = response.data.data
+        })
+        
     }
 };
 </script>
